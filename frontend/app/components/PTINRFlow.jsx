@@ -1,7 +1,6 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
-// MUST have "export default" to prevent React errors
 export default function PTINRFlow() {
   const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
@@ -18,13 +17,14 @@ export default function PTINRFlow() {
     if (selectedFile) {
       setFile(selectedFile);
       setPreview(URL.createObjectURL(selectedFile));
-      setStep(2); // Auto-advance to patient details when image is selected
+      setStep(2); // Auto-advance to details when image is selected
     }
   };
 
   const handleAnalyze = async () => {
-    setStep(3); // Move to the animated loading screen
+    setStep(3); // Move to loading screen
     
+    // Simulate API Call (Replace with your actual fetch code to FastAPI)
     const formData = new FormData();
     formData.append("file", file);
     formData.append("gender", gender);
@@ -36,34 +36,20 @@ export default function PTINRFlow() {
         method: "POST",
         body: formData,
       });
-      
       const data = await response.json();
-
-      // --- ROBUST ERROR HANDLING ---
-      // Check if the backend rejected the image (e.g., no red shapes found)
-      if (!response.ok) {
-        alert(data.detail || "Diagnosis failed. Please try a different image.");
-        setStep(2); // Kick them back to the details screen to try again
-        return;     
-      }
-
-      // If it passes, move to the final results screen!
       setResults(data);
-      setStep(4); 
-      
+      setStep(4); // Move to results
     } catch (error) {
       console.error("Error diagnosing:", error);
-      alert("Failed to connect to backend. Is your FastAPI server running?");
-      setStep(2); 
+      alert("Failed to connect to backend.");
+      setStep(2); // Go back if failed
     }
   };
 
   return (
     <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       
-      {/* ========================================== */}
-      {/* STEP 1: CAPTURE IMAGE                      */}
-      {/* ========================================== */}
+      {/* STEP 1: CAPTURE IMAGE */}
       {step === 1 && (
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
           <h2 className="text-xl font-bold text-indigo-950 mb-2">Diagnostic Capture</h2>
@@ -91,9 +77,7 @@ export default function PTINRFlow() {
         </div>
       )}
 
-      {/* ========================================== */}
-      {/* STEP 2: PATIENT DETAILS                    */}
-      {/* ========================================== */}
+      {/* STEP 2: PATIENT DETAILS */}
       {step === 2 && (
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
           <button onClick={() => setStep(1)} className="text-slate-400 mb-4 flex items-center text-sm font-semibold hover:text-indigo-600 transition-colors">
@@ -141,9 +125,7 @@ export default function PTINRFlow() {
         </div>
       )}
 
-      {/* ========================================== */}
-      {/* STEP 3: PROCESSING (LOADING)               */}
-      {/* ========================================== */}
+      {/* STEP 3: PROCESSING (LOADING) */}
       {step === 3 && (
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 text-center py-12">
            <div className="relative w-20 h-20 mx-auto mb-6">
@@ -155,9 +137,7 @@ export default function PTINRFlow() {
         </div>
       )}
 
-      {/* ========================================== */}
-      {/* STEP 4: DIAGNOSTIC RESULTS                 */}
-      {/* ========================================== */}
+      {/* STEP 4: DIAGNOSTIC RESULTS */}
       {step === 4 && results && (
         <div className="space-y-6">
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
@@ -179,11 +159,11 @@ export default function PTINRFlow() {
                  </span>
               </div>
               
-              {/* Visual bar */}
+              {/* Fake visual bar for mockup accuracy */}
               <div className="w-full h-3 bg-gradient-to-r from-rose-400 via-emerald-400 to-rose-400 rounded-full relative mb-6">
+                 {/* The marker pip */}
                  <div className="absolute top-1/2 -translate-y-1/2 w-1 h-5 bg-slate-900 rounded-full" style={{ left: '40%' }}></div>
               </div>
-              <p className="text-xs font-medium text-slate-500 text-center">{results.ptinr_diagnosis}</p>
             </div>
 
             {/* Minor Results Row */}
@@ -191,9 +171,7 @@ export default function PTINRFlow() {
                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">HCT</p>
                   <span className="text-xl font-black text-slate-800">{results.hct_value}%</span>
-                  <p className={`text-xs font-semibold mt-1 ${results.hct_diagnosis.includes("Normal") ? "text-emerald-600" : "text-rose-600"}`}>
-                    {results.hct_diagnosis}
-                  </p>
+                  <p className="text-xs font-semibold text-emerald-600 mt-1">{results.hct_diagnosis}</p>
                </div>
                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Status</p>
@@ -203,10 +181,10 @@ export default function PTINRFlow() {
           </div>
 
           <div className="flex flex-col space-y-3">
-            <button onClick={() => { setStep(1); setFile(null); setResults(null); setPreview(null); }} className="w-full bg-indigo-900 text-white font-bold py-3.5 rounded-xl shadow-md active:scale-95 transition-transform">
+            <button onClick={() => { setStep(1); setFile(null); setResults(null); }} className="w-full bg-indigo-900 text-white font-bold py-3.5 rounded-xl shadow-md active:scale-95 transition-transform">
               + New Test
             </button>
-            <button className="w-full bg-white text-indigo-900 border border-indigo-200 font-bold py-3.5 rounded-xl shadow-sm hover:bg-slate-50 active:scale-95 transition-all">
+            <button className="w-full bg-white text-indigo-900 border border-indigo-200 font-bold py-3.5 rounded-xl shadow-sm active:scale-95 transition-transform">
               Export Lab Report (PDF)
             </button>
           </div>

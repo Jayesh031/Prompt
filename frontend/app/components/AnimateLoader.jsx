@@ -80,13 +80,13 @@ export default function AnimateLoader() {
               {/* Text Reveal: promPT */}
               <div className="flex text-5xl md:text-6xl tracking-tight">
                 <div className="flex font-light text-slate-100 overflow-hidden">
-                  {["p", "r", "o", "m"].map((letter, i) => (
+                  {["P", "r", "o", "m"].map((letter, i) => (
                     <motion.span key={`prom-${i}`} variants={item} className="inline-block">
                       {letter}
                     </motion.span>
                   ))}
                 </div>
-                <div className="flex font-bold text-blue-500 overflow-hidden ml-1">
+                <div className="flex font-bold text-[#0763C4] overflow-hidden ml-1">
                   {["P", "T"].map((letter, i) => (
                     <motion.span key={`pt-${i}`} variants={item} className="inline-block">
                       {letter}

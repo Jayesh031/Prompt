@@ -25,8 +25,8 @@ export default function ResponsiveNav() {
             <Image src="/logo.png" alt="promPT Logo" fill className="object-contain" priority />
           </div>
           <div className="text-2xl tracking-tight">
-            <span className="font-light text-slate-100">prom</span>
-            <span className="font-bold text-blue-500">PT</span>
+            <span className="font-light text-slate-100">Prom</span>
+            <span className="font-bold text-[#0763C4]">PT</span>
           </div>
         </div>
 

@@ -23,9 +23,19 @@ export default function HomeHero() {
         
         {/* LEFT & CENTER COLUMN: Copy & Main Header (Span 7 to allow a centered-feel with visuals) */}
         <div className="flex flex-col items-center lg:items-start lg:col-span-7">
+          
+          {/* Mobile-only Website Logo (Visible below md screens) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            className="mb-8 flex md:hidden items-center justify-center"
+          >
+            <Image src="/logo.png" alt="Toucan Logo" width={128} height={128} className="object-contain" />
+          </motion.div>
+
+          {/* Desktop-only Capsule (Visible from md screens and up) */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} 
-            className="mb-8 inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-blue-100 text-blue-700 text-sm font-semibold tracking-wide shadow-inner"
+            className="mb-8 hidden md:inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-blue-100 text-blue-700 text-sm font-semibold tracking-wide shadow-inner"
             style={{ backgroundColor: `${brandBlueDeep}10` }} // 10% opacity blue
           >
             <ShieldCheck size={18} style={{ color: brandBlueDeep }} /> Clinical-Grade Assay Precision
@@ -33,7 +43,7 @@ export default function HomeHero() {
           
           <motion.h1 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} 
-            className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-950 tracking-tighter mb-8 leading-[1.05]"
+            className="text-2xl md:text-3xl lg:text-7xl font-extrabold text-slate-950 tracking-tighter mb-8 leading-[1.05]"
           >
             Rapid <span className="text-sky-900">Point-of-Care</span>
             {/* Added a text element using the brand gold color for emphasis */}

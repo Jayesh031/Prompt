@@ -1,7 +1,10 @@
-from fastapi import APIRouter, File, UploadFile, Form
+from fastapi import APIRouter, File, UploadFile, Form, HTTPException
 from models.schemas import DiagnosisResponse
 from services.image_utils import process_assay_image
 from services.diagnostics import calculate_metrics, generate_diagnosis
+from models.schemas import WarfarinDosageRequest, WarfarinDosageResponse
+from services.warfarin_calc import calculate_warfarin_dosage
+
 
 router = APIRouter()
 
@@ -35,3 +38,17 @@ async def diagnose(
         ptinr_value=round(ptinr, 2),
         ptinr_diagnosis=ptinr_diagnosis
     )
+
+
+
+@router.post("/warfarin-dose", response_model=WarfarinDosageResponse)
+async def get_warfarin_dosage(request: WarfarinDosageRequest):
+    try:
+        # Call the calculation service
+        result = calculate_warfarin_dosage(request)
+        return WarfarinDosageResponse(**result)
+    except ValueError as e:
+        # Handle specific validation errors (like missing maintenance dose)
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error calculating dosage")

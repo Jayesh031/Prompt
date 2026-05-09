@@ -79,7 +79,6 @@ export default function PTINRWizard() {
 
   const downloadPDF = async () => {
     try {
-      // Point to the new HIDDEN desktop template
       const input = document.getElementById("ptinr-pdf-template");
       if (!input) return alert("Could not find the report content to download.");
 
@@ -102,38 +101,66 @@ export default function PTINRWizard() {
     }
   };
 
-  // Helper function to render the visual INR scale inline
-  const renderScale = (score) => {
+  // UPDATED: Helper function dynamically sets ranges based on patient form data
+  const renderScale = (score, onWarfarin, hasMitralValve) => {
     const numScore = parseFloat(score);
     if (isNaN(numScore)) return null;
 
-    // Calc marker position capped between 0 and 100% on a 0-6.0 scale
-    const percentage = Math.min(Math.max((numScore / 6.0) * 100, 0), 100);
+    // 1. Determine Target Range based on logic rules
+    let targetMin = 0.8;
+    let targetMax = 1.1;
+
+    if (hasMitralValve === "Y") {
+      targetMin = 2.5;
+      targetMax = 3.5;
+    } else if (onWarfarin === "Y") {
+      targetMin = 2.0;
+      targetMax = 3.0;
+    }
+
+    // 2. Calculate percentages for the visual bars relative to a 0-6.0 scale axis
+    const scaleMax = 6.0;
+    const lowPct = (targetMin / scaleMax) * 100;
+    const targetPct = ((targetMax - targetMin) / scaleMax) * 100;
+    
+    // Anything above targetMax is abnormal high. We map a band of +1.5 as 'High' and the rest as 'Critical'
+    const highLimit = Math.min(targetMax + 1.5, scaleMax);
+    const highPct = ((highLimit - targetMax) / scaleMax) * 100;
+    const criticalPct = Math.max(((scaleMax - highLimit) / scaleMax) * 100, 0);
+
+    // Marker location
+    const markerPct = Math.min(Math.max((numScore / scaleMax) * 100, 0), 100);
 
     return (
       <div className="w-full mt-4 mb-6">
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Diagnostic Scale</p>
+        <div className="flex justify-between items-end mb-2">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Diagnostic Scale</p>
+          <p className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 uppercase tracking-widest">
+            Target: {targetMin} - {targetMax}
+          </p>
+        </div>
+        
         <div className="relative w-full h-3 sm:h-4 rounded-full overflow-hidden bg-slate-200 flex shadow-inner">
-          <div className="h-full bg-yellow-400" style={{ width: '33.33%' }} title="Low"></div>
-          <div className="h-full bg-emerald-500" style={{ width: '16.67%' }} title="Target"></div>
-          <div className="h-full bg-orange-400" style={{ width: '25%' }} title="High"></div>
-          <div className="h-full bg-red-500" style={{ width: '25%' }} title="Critical"></div>
+          <div className="h-full bg-yellow-400" style={{ width: `${lowPct}%` }} title="Abnormal (Low)"></div>
+          <div className="h-full bg-emerald-500" style={{ width: `${targetPct}%` }} title="Normal (Target)"></div>
+          <div className="h-full bg-orange-400" style={{ width: `${highPct}%` }} title="Abnormal (High)"></div>
+          <div className="h-full bg-red-500" style={{ width: `${criticalPct}%` }} title="Abnormal (Critical)"></div>
 
           {/* Dynamic Marker */}
           <div
             className="absolute top-0 bottom-0 w-1 bg-slate-800 z-10 transition-all duration-1000 ease-out"
-            style={{ left: `calc(${percentage}% - 2px)` }}
+            style={{ left: `calc(${markerPct}% - 2px)` }}
           >
             <div className="absolute -top-2 -left-1.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-slate-800"></div>
             <div className="absolute -bottom-2 -left-1.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-slate-800"></div>
           </div>
         </div>
-        {/* Scale Labels */}
+        
+        {/* Dynamic Scale Labels bound exactly to the colored zones */}
         <div className="relative w-full h-4 mt-2 text-[10px] sm:text-xs font-semibold text-slate-400">
           <span className="absolute left-0">0</span>
-          <span className="absolute" style={{ left: '33.33%', transform: 'translateX(-50%)' }}>2.0</span>
-          <span className="absolute" style={{ left: '50%', transform: 'translateX(-50%)' }}>3.0</span>
-          <span className="absolute" style={{ left: '75%', transform: 'translateX(-50%)' }}>4.5</span>
+          <span className="absolute" style={{ left: `${lowPct}%`, transform: 'translateX(-50%)' }}>{targetMin}</span>
+          <span className="absolute" style={{ left: `${lowPct + targetPct}%`, transform: 'translateX(-50%)' }}>{targetMax}</span>
           <span className="absolute right-0">6.0+</span>
         </div>
       </div>
@@ -262,8 +289,8 @@ export default function PTINRWizard() {
                 </div>
               </div>
 
-              {/* INTEGRATED SCALE IN UI */}
-              {renderScale(result.ptinr_value)}
+              {/* DYNAMIC INTEGRATED SCALE IN UI */}
+              {renderScale(result.ptinr_value, formData.on_warfarin, formData.mechanical_mitral_valve)}
 
               <div className="space-y-3 sm:space-y-4 w-full">
                 <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.ptinr_diagnosis === "Normal" ? "bg-emerald-50 border-emerald-500" : "bg-[#800000]/5 border-[#800000]"}`}>
@@ -322,8 +349,8 @@ export default function PTINRWizard() {
                   </div>
                 </div>
 
-                {/* INTEGRATED SCALE IN PDF TEMPLATE */}
-                {renderScale(result.ptinr_value)}
+                {/* DYNAMIC INTEGRATED SCALE IN PDF TEMPLATE */}
+                {renderScale(result.ptinr_value, formData.on_warfarin, formData.mechanical_mitral_valve)}
 
                 {/* Diagnoses */}
                 <div className="space-y-6 mt-6 w-full">

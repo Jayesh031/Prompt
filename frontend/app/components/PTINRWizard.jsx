@@ -102,6 +102,44 @@ export default function PTINRWizard() {
     }
   };
 
+  // Helper function to render the visual INR scale inline
+  const renderScale = (score) => {
+    const numScore = parseFloat(score);
+    if (isNaN(numScore)) return null;
+
+    // Calc marker position capped between 0 and 100% on a 0-6.0 scale
+    const percentage = Math.min(Math.max((numScore / 6.0) * 100, 0), 100);
+
+    return (
+      <div className="w-full mt-4 mb-6">
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Diagnostic Scale</p>
+        <div className="relative w-full h-3 sm:h-4 rounded-full overflow-hidden bg-slate-200 flex shadow-inner">
+          <div className="h-full bg-yellow-400" style={{ width: '33.33%' }} title="Low"></div>
+          <div className="h-full bg-emerald-500" style={{ width: '16.67%' }} title="Target"></div>
+          <div className="h-full bg-orange-400" style={{ width: '25%' }} title="High"></div>
+          <div className="h-full bg-red-500" style={{ width: '25%' }} title="Critical"></div>
+
+          {/* Dynamic Marker */}
+          <div
+            className="absolute top-0 bottom-0 w-1 bg-slate-800 z-10 transition-all duration-1000 ease-out"
+            style={{ left: `calc(${percentage}% - 2px)` }}
+          >
+            <div className="absolute -top-2 -left-1.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-slate-800"></div>
+            <div className="absolute -bottom-2 -left-1.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-slate-800"></div>
+          </div>
+        </div>
+        {/* Scale Labels */}
+        <div className="relative w-full h-4 mt-2 text-[10px] sm:text-xs font-semibold text-slate-400">
+          <span className="absolute left-0">0</span>
+          <span className="absolute" style={{ left: '33.33%', transform: 'translateX(-50%)' }}>2.0</span>
+          <span className="absolute" style={{ left: '50%', transform: 'translateX(-50%)' }}>3.0</span>
+          <span className="absolute" style={{ left: '75%', transform: 'translateX(-50%)' }}>4.5</span>
+          <span className="absolute right-0">6.0+</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full max-w-xl mx-auto mt-6 sm:mt-10 bg-white p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2rem] shadow-sm sm:shadow-[0_20px_60px_rgba(0,51,102,0.08)] border border-slate-100 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-1.5 sm:h-2 bg-gradient-to-r from-[#003366] via-[#FFCC33] to-[#800000]"></div>
@@ -207,7 +245,7 @@ export default function PTINRWizard() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 w-full">
                 <div className="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-100 w-full">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Prothrombin Time</p>
                   <div className="flex items-baseline gap-1">
@@ -223,6 +261,9 @@ export default function PTINRWizard() {
                   </div>
                 </div>
               </div>
+
+              {/* INTEGRATED SCALE IN UI */}
+              {renderScale(result.ptinr_value)}
 
               <div className="space-y-3 sm:space-y-4 w-full">
                 <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.ptinr_diagnosis === "Normal" ? "bg-emerald-50 border-emerald-500" : "bg-[#800000]/5 border-[#800000]"}`}>
@@ -264,7 +305,7 @@ export default function PTINRWizard() {
                 </div>
                 
                 {/* Metrics (Strict Grid Cols 2) */}
-                <div className="grid grid-cols-2 gap-6 mb-8 w-full">
+                <div className="grid grid-cols-2 gap-6 mb-4 w-full">
                   <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 w-full">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Prothrombin Time</p>
                     <div className="flex items-baseline gap-2">
@@ -281,8 +322,11 @@ export default function PTINRWizard() {
                   </div>
                 </div>
 
+                {/* INTEGRATED SCALE IN PDF TEMPLATE */}
+                {renderScale(result.ptinr_value)}
+
                 {/* Diagnoses */}
-                <div className="space-y-6 w-full">
+                <div className="space-y-6 mt-6 w-full">
                   <div className={`p-6 rounded-xl border-l-4 w-full ${result.ptinr_diagnosis === "Normal" ? "bg-emerald-50 border-emerald-500" : "bg-[#800000]/5 border-[#800000]"}`}>
                     <p className="font-bold mb-2 text-xs uppercase tracking-wider text-slate-500">PT/INR Indication</p>
                     <p className={`font-bold text-lg ${result.ptinr_diagnosis === "Normal" ? "text-emerald-700" : "text-[#800000]"}`}>{result.ptinr_diagnosis}</p>

@@ -101,7 +101,7 @@ export default function PTINRWizard() {
     }
   };
 
-  // UPDATED: Modern Gradient Scale dynamically setting ranges based on patient form data
+  // UPDATED: Gradient colors adjusted for Light/Dark Yellow and Lighter Red
   const renderScale = (score, onWarfarin, hasMitralValve) => {
     const numScore = parseFloat(score);
     if (isNaN(numScore)) return null;
@@ -137,15 +137,15 @@ export default function PTINRWizard() {
 
     const modernGradient = {
       background: `linear-gradient(to right,
-        #fbbf24 0%, 
-        #fbbf24 ${Math.max(0, targetStart - 3)}%, 
+        #fef08a 0%, 
+        #f59e0b ${Math.max(0, targetStart - 3)}%, 
         #34d399 ${targetStart}%, 
         #10b981 ${targetStart + 2}%, 
         #10b981 ${targetEnd - 2}%, 
         #34d399 ${targetEnd}%, 
         #fb923c ${Math.min(100, targetEnd + 3)}%, 
-        #ef4444 ${dangerStart}%, 
-        #b91c1c 100%
+        #f87171 ${dangerStart}%, 
+        #ef4444 100%
       )`
     };
 

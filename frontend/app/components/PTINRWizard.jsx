@@ -314,7 +314,7 @@ export default function PTINRWizard() {
                   <p className="font-bold mb-1 text-[10px] uppercase tracking-wider text-slate-500">PT/INR Indication</p>
                   <p className={`font-bold text-xs sm:text-sm ${result.ptinr_diagnosis === "Normal" ? "text-emerald-700" : "text-[#800000]"}`}>{result.ptinr_diagnosis}</p>
                 </div>
-                <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.hct_diagnosis?.includes("Normal") ? "bg-emerald-50 border-emerald-500" : "bg-amber-50 border-amber-500"}`}>
+                <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.hct_diagnosis?.includes("Normal") ? "bg-emerald-500 border-emerald-50" : "bg-amber-50 border-amber-500"}`}>
                   <p className="font-bold mb-1 text-[10px] uppercase tracking-wider text-slate-500">HCT Indication</p>
                   <p className={`font-bold text-xs sm:text-sm ${result.hct_diagnosis?.includes("Normal") ? "text-emerald-700" : "text-amber-700"}`}>{result.hct_diagnosis}</p>
                 </div>

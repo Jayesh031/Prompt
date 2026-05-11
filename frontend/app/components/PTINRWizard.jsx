@@ -137,8 +137,8 @@ export default function PTINRWizard() {
 
     const modernGradient = {
       background: `linear-gradient(to right,
-        #fef08a 0%, 
-        #f59e0b ${Math.max(0, targetStart - 3)}%, 
+        #f59e0b 0%, 
+        #fef08a ${Math.max(0, targetStart - 3)}%,         
         #34d399 ${targetStart}%, 
         #10b981 ${targetStart + 2}%, 
         #10b981 ${targetEnd - 2}%, 
@@ -310,11 +310,11 @@ export default function PTINRWizard() {
               {renderScale(result.ptinr_value, formData.on_warfarin, formData.mechanical_mitral_valve)}
 
               <div className="space-y-3 sm:space-y-4 w-full">
-                <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.ptinr_diagnosis === "Normal" ? "bg-emerald-500 border-emerald-50" : "bg-[#800000]/5 border-[#800000]"}`}>
+                <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.ptinr_diagnosis === "Normal" ? "bg-emerald-50 border-emerald-500" : "bg-[#800000]/5 border-[#800000]"}`}>
                   <p className="font-bold mb-1 text-[10px] uppercase tracking-wider text-slate-500">PT/INR Indication</p>
                   <p className={`font-bold text-xs sm:text-sm ${result.ptinr_diagnosis === "Normal" ? "text-emerald-700" : "text-[#800000]"}`}>{result.ptinr_diagnosis}</p>
                 </div>
-                <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.hct_diagnosis?.includes("Normal") ? "bg-emerald-500 border-emerald-50" : "bg-amber-50 border-amber-500"}`}>
+                <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.hct_diagnosis?.includes("Normal") ? "bg-emerald-50 border-emerald-500" : "bg-amber-50 border-amber-500"}`}>
                   <p className="font-bold mb-1 text-[10px] uppercase tracking-wider text-slate-500">HCT Indication</p>
                   <p className={`font-bold text-xs sm:text-sm ${result.hct_diagnosis?.includes("Normal") ? "text-emerald-700" : "text-amber-700"}`}>{result.hct_diagnosis}</p>
                 </div>

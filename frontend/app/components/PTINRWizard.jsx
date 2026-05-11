@@ -101,7 +101,7 @@ export default function PTINRWizard() {
     }
   };
 
-  // UPDATED: Helper function dynamically sets ranges based on patient form data
+  // UPDATED: Modern Gradient Scale dynamically setting ranges based on patient form data
   const renderScale = (score, onWarfarin, hasMitralValve) => {
     const numScore = parseFloat(score);
     if (isNaN(numScore)) return null;
@@ -126,10 +126,28 @@ export default function PTINRWizard() {
     // Anything above targetMax is abnormal high. We map a band of +1.5 as 'High' and the rest as 'Critical'
     const highLimit = Math.min(targetMax + 1.5, scaleMax);
     const highPct = ((highLimit - targetMax) / scaleMax) * 100;
-    const criticalPct = Math.max(((scaleMax - highLimit) / scaleMax) * 100, 0);
 
     // Marker location
     const markerPct = Math.min(Math.max((numScore / scaleMax) * 100, 0), 100);
+
+    // 3. Dynamic Gradient Logic for a modern, smooth look
+    const targetStart = lowPct;
+    const targetEnd = lowPct + targetPct;
+    const dangerStart = targetEnd + highPct;
+
+    const modernGradient = {
+      background: `linear-gradient(to right,
+        #fbbf24 0%, 
+        #fbbf24 ${Math.max(0, targetStart - 3)}%, 
+        #34d399 ${targetStart}%, 
+        #10b981 ${targetStart + 2}%, 
+        #10b981 ${targetEnd - 2}%, 
+        #34d399 ${targetEnd}%, 
+        #fb923c ${Math.min(100, targetEnd + 3)}%, 
+        #ef4444 ${dangerStart}%, 
+        #b91c1c 100%
+      )`
+    };
 
     return (
       <div className="w-full mt-4 mb-6">
@@ -140,15 +158,14 @@ export default function PTINRWizard() {
           </p>
         </div>
         
-        <div className="relative w-full h-3 sm:h-4 rounded-full overflow-hidden bg-slate-200 flex shadow-inner">
-          <div className="h-full bg-yellow-400" style={{ width: `${lowPct}%` }} title="Abnormal (Low)"></div>
-          <div className="h-full bg-emerald-500" style={{ width: `${targetPct}%` }} title="Normal (Target)"></div>
-          <div className="h-full bg-orange-400" style={{ width: `${highPct}%` }} title="Abnormal (High)"></div>
-          <div className="h-full bg-red-500" style={{ width: `${criticalPct}%` }} title="Abnormal (Critical)"></div>
-
+        {/* Modern Gradient Scale Container */}
+        <div 
+          className="relative w-full h-3 sm:h-4 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] border border-slate-200/50"
+          style={modernGradient}
+        >
           {/* Dynamic Marker */}
           <div
-            className="absolute top-0 bottom-0 w-1 bg-slate-800 z-10 transition-all duration-1000 ease-out"
+            className="absolute top-0 bottom-0 w-1 bg-slate-800 z-10 transition-all duration-1000 ease-out shadow-sm"
             style={{ left: `calc(${markerPct}% - 2px)` }}
           >
             <div className="absolute -top-2 -left-1.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-slate-800"></div>
@@ -159,8 +176,8 @@ export default function PTINRWizard() {
         {/* Dynamic Scale Labels bound exactly to the colored zones */}
         <div className="relative w-full h-4 mt-2 text-[10px] sm:text-xs font-semibold text-slate-400">
           <span className="absolute left-0">0</span>
-          <span className="absolute" style={{ left: `${lowPct}%`, transform: 'translateX(-50%)' }}>{targetMin}</span>
-          <span className="absolute" style={{ left: `${lowPct + targetPct}%`, transform: 'translateX(-50%)' }}>{targetMax}</span>
+          <span className="absolute transition-all duration-500" style={{ left: `${lowPct}%`, transform: 'translateX(-50%)' }}>{targetMin}</span>
+          <span className="absolute transition-all duration-500" style={{ left: `${lowPct + targetPct}%`, transform: 'translateX(-50%)' }}>{targetMax}</span>
           <span className="absolute right-0">6.0+</span>
         </div>
       </div>
@@ -297,9 +314,9 @@ export default function PTINRWizard() {
                   <p className="font-bold mb-1 text-[10px] uppercase tracking-wider text-slate-500">PT/INR Indication</p>
                   <p className={`font-bold text-xs sm:text-sm ${result.ptinr_diagnosis === "Normal" ? "text-emerald-700" : "text-[#800000]"}`}>{result.ptinr_diagnosis}</p>
                 </div>
-                <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.hct_diagnosis.includes("Normal") ? "bg-emerald-50 border-emerald-500" : "bg-amber-50 border-amber-500"}`}>
+                <div className={`p-3 sm:p-4 rounded-xl border-l-4 w-full ${result.hct_diagnosis?.includes("Normal") ? "bg-emerald-50 border-emerald-500" : "bg-amber-50 border-amber-500"}`}>
                   <p className="font-bold mb-1 text-[10px] uppercase tracking-wider text-slate-500">HCT Indication</p>
-                  <p className={`font-bold text-xs sm:text-sm ${result.hct_diagnosis.includes("Normal") ? "text-emerald-700" : "text-amber-700"}`}>{result.hct_diagnosis}</p>
+                  <p className={`font-bold text-xs sm:text-sm ${result.hct_diagnosis?.includes("Normal") ? "text-emerald-700" : "text-amber-700"}`}>{result.hct_diagnosis}</p>
                 </div>
               </div>
             </div>
@@ -358,9 +375,9 @@ export default function PTINRWizard() {
                     <p className="font-bold mb-2 text-xs uppercase tracking-wider text-slate-500">PT/INR Indication</p>
                     <p className={`font-bold text-lg ${result.ptinr_diagnosis === "Normal" ? "text-emerald-700" : "text-[#800000]"}`}>{result.ptinr_diagnosis}</p>
                   </div>
-                  <div className={`p-6 rounded-xl border-l-4 w-full ${result.hct_diagnosis.includes("Normal") ? "bg-emerald-50 border-emerald-500" : "bg-amber-50 border-amber-500"}`}>
+                  <div className={`p-6 rounded-xl border-l-4 w-full ${result.hct_diagnosis?.includes("Normal") ? "bg-emerald-50 border-emerald-500" : "bg-amber-50 border-amber-500"}`}>
                     <p className="font-bold mb-2 text-xs uppercase tracking-wider text-slate-500">HCT Indication</p>
-                    <p className={`font-bold text-lg ${result.hct_diagnosis.includes("Normal") ? "text-emerald-700" : "text-amber-700"}`}>{result.hct_diagnosis}</p>
+                    <p className={`font-bold text-lg ${result.hct_diagnosis?.includes("Normal") ? "text-emerald-700" : "text-amber-700"}`}>{result.hct_diagnosis}</p>
                   </div>
                 </div>
               </div>
